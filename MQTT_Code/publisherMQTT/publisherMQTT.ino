@@ -33,7 +33,7 @@ void loop() {
 //  }
 
     keyPress++;
-    itoa(keyPress, buff, 10);
+    itoa(keyPress, buff, 10); //ส่งdata ออกไป
     mqttClient.publish("esekku/room1/toggle", buff, true);
     Serial.print("published ");
     Serial.println(buff);
