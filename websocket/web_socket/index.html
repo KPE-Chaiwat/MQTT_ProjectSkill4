@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter Web App</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #counter_ {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        button {
+            font-size: 18px;
+            margin: 0 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Counter Web App</h1>
+
+    <div id="counter_">0</div>
+
+    <button onclick="incrementCounter()">Add</button>
+    <button onclick="resetCounter()">Reset</button>
+
+    <script>
+        // JavaScript logic
+        let counter_var = 0;
+
+        function incrementCounter() {
+         counter_var++;
+            updateCounter();
+        }
+
+        function resetCounter() {
+         counter_var = 0;
+            updateCounter();
+        }
+
+        function updateCounter() {
+         // เชื่อมตัวแปรเข้ากับ  htmlผ่านid counter_ กับตัวแปร counter_var
+            document.getElementById('counter_').innerText = counter_var; 
+        }
+    </script>
+
+</body>
+</html>
