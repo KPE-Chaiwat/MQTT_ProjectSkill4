@@ -9,9 +9,7 @@ SoftwareSerial mySerial(16, 17); // RX, TX
 
 ModbusMaster node;
 uint8_t slaveID = 1; // Default slave ID
-
-uint8_t Quanitity = 2;
-
+uint8_t Quantity = 2;
 uint8_t Address = 1;
 
 //
@@ -39,20 +37,17 @@ void setSlaveID() {
     } else {
       // Access the value in the document
       int receivedID = doc["ID"];
-      int receivedQuanitity = doc["Quanitity"];
+      int receivedQuantity = doc["Quantity"];
       int receivedAddress = doc["Address"];
       // when set SlaveID when receivedID
 
       slaveID = receivedID;
-      Quanitity = receivedQuanitity;
+      Quantity = receivedQuantity;
       Address = receivedAddress;
-      //      Serial.println(receivedID);
-      //      Serial.println(Quanitity);
-      //      Serial.println(Address);
+    
     }
     // Reinitialize ModbusMaster with the new slave ID
     node.begin(slaveID, mySerial);
-    //Serial.print("Updated Slave ID: ");
    Serial.println(slaveID);
   }
 }
@@ -97,12 +92,11 @@ void setup()
 void loop()
 {
   setSlaveID();
-
   uint8_t result;  
   uint16_t data[2];
-
+  
 //  result = node.readInputRegisters(1, 2);
-result = node.readInputRegisters(Address, Quanitity);
+result = node.readInputRegisters(Address, Quantity);
   if (result == node.ku8MBSuccess)
   {
     //    Serial.print("Temp: ");
@@ -111,7 +105,7 @@ result = node.readInputRegisters(Address, Quanitity);
     //    Serial.println(node.getResponseBuffer(1) / 10.0f);
     //    Serial.println();
 
-    for (int i = 0; i < Quanitity; i++) {  
+    for (int i = 0; i < Quantity; i++) {  
       sendMessage[i]= node.getResponseBuffer(i);
     }
  // sent Data
@@ -122,18 +116,4 @@ result = node.readInputRegisters(Address, Quanitity);
     Serial.print(".\n");//ห้ามแก้
   }
   delay(1000);
-}
-
-
-
-
-
-String SetType(char * type) {
-
- 
-  
-  String tempString = String(type);
-  return tempString;
-
-  
 }
