@@ -9,9 +9,12 @@ SoftwareSerial mySerial(16, 17); // RX, TX
 
 ModbusMaster node;
 uint8_t slaveID = 1; // Default slave ID
+
 uint8_t Quantity = 2;
+
 uint8_t Address = 1;
 
+int BaudRate_Sensor = 9600;
 //
 
 String sendMessage[1024] ; //เอาไว้เก็บdata ก่อนส่งออกไปที่ pi
@@ -21,6 +24,7 @@ String sendMessage[1024] ; //เอาไว้เก็บdata ก่อนส�
 
 
 void setSlaveID() {
+  
   if (Serial.available() > 0) {
     // Read the JSON string from Serial
     String jsonString = Serial.readString();
@@ -39,16 +43,25 @@ void setSlaveID() {
       int receivedID = doc["ID"];
       int receivedQuantity = doc["Quantity"];
       int receivedAddress = doc["Address"];
+      int receiveBaudRate_Sensor=doc["Baudrate"];
       // when set SlaveID when receivedID
 
       slaveID = receivedID;
       Quantity = receivedQuantity;
       Address = receivedAddress;
-    
+      BaudRate_Sensor = receiveBaudRate_Sensor;
+     
     }
     // Reinitialize ModbusMaster with the new slave ID
     node.begin(slaveID, mySerial);
-   Serial.println(slaveID);
+    Serial.print("Updated BaudRate_Sensor: ");
+    Serial.println(BaudRate_Sensor);
+    Serial.print("Updated slaveID: ");
+    Serial.println(slaveID);
+    Serial.print("Updated Address: ");
+    Serial.println(Address);
+    Serial.print("Updated Quantity: ");
+    Serial.println(Quantity);
   }
 }
 
@@ -66,6 +79,7 @@ void postTransmission()
 
 void setup()
 {
+  BaudRate_Sensor = 9600;
   pinMode(MAX485_RE_NEG, OUTPUT);
   pinMode(MAX485_DE, OUTPUT);
   // Init in receive mode
@@ -78,7 +92,8 @@ void setup()
     Serial.println("loop for init serial 0");
   }
   Serial.println("start init software serial");
-  mySerial.begin(9600);
+ //mySerial.begin(9600);
+  mySerial.begin(BaudRate_Sensor);//-----set baudrate sensor
   while (!mySerial) {
     Serial.println("loop for init software serial");
   }
@@ -92,9 +107,10 @@ void setup()
 void loop()
 {
   setSlaveID();
+
   uint8_t result;  
   uint16_t data[2];
-  
+
 //  result = node.readInputRegisters(1, 2);
 result = node.readInputRegisters(Address, Quantity);
   if (result == node.ku8MBSuccess)
