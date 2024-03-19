@@ -8,22 +8,30 @@ SoftwareSerial mySerial(16, 17); // RX, TX
 #define MAX485_RE_NEG  18
 
 ModbusMaster node;
+
+
+bool Mode_R_W = true;
+
+//-----------------variable read sensor---------------------------------
 uint8_t slaveID = 1; // Default slave ID
-
 uint8_t Quantity = 2;
-
-uint8_t Address = 1;
-
+int FunctionCode_read = 3;
+uint8_t Address_read = 1;
 int BaudRate_Sensor = 9600;
-//
+//------------------------variable write Sensor----------------------------------------------
+uint8_t Address_write = 1;
+uint8_t value ="";
+bool value_bool = false;
+int FunctionCode_write = 3;
+//----------------------------------------------------------------------
 
-String sendMessage[1024] ; //เอาไว้เก็บdata ก่อนส่งออกไปที่ pi
+String sendMessage[1024] ; //เอาไว้เก็บdata ก่อนส่งออกไปที่ pi3
 
 
 
 
-
-void setSlaveID() {
+//-----------------------------SetSlaveID Function----------------------------------
+void SetSlaveID() {
   
   if (Serial.available() > 0) {
     // Read the JSON string from Serial
@@ -39,29 +47,34 @@ void setSlaveID() {
       Serial.print("Failed to parse JSON: ");
       Serial.println(error.c_str());
     } else {
-      // Access the value in the document
+
+      bool receiveMode= doc["Mode_R_W"];
+      int receiveFunctionCode =doc[]
+      Mode_R_W =receiveMode;
+   // variable read
       int receivedID = doc["ID"];
       int receivedQuantity = doc["Quantity"];
-      int receivedAddress = doc["Address"];
+      int receivedAddress_read = doc["Address_Read"];
       int receiveBaudRate_Sensor=doc["Baudrate"];
-      // when set SlaveID when receivedID
-
       slaveID = receivedID;
       Quantity = receivedQuantity;
-      Address = receivedAddress;
+      Address_read = receivedAddress_read;
       BaudRate_Sensor = receiveBaudRate_Sensor;
+
+
+      // variable write
+      uint8_t receiveValue= doc["Value_write"];
+      int receiveAddress_write = doc["Address_write"];
+      value = receiveValue;
+      Address_write=receiveAddress_write;
+      value_bool= SetboolValue_bool(value);
+
+
      
     }
     // Reinitialize ModbusMaster with the new slave ID
     node.begin(slaveID, mySerial);
-    Serial.print("Updated BaudRate_Sensor: ");
-    Serial.println(BaudRate_Sensor);
-    Serial.print("Updated slaveID: ");
-    Serial.println(slaveID);
-    Serial.print("Updated Address: ");
-    Serial.println(Address);
-    Serial.print("Updated Quantity: ");
-    Serial.println(Quantity);
+
   }
 }
 
@@ -76,7 +89,21 @@ void postTransmission()
   digitalWrite(MAX485_RE_NEG, 0);
   digitalWrite(MAX485_DE, 0);
 }
+///------------------------SetFunctionCode-------------------------------------
+  void SetFunctionCode(){
 
+  }
+
+
+///-------------------SetUp value boolean-----------------------------------------
+bool SetboolValue_bool(uint8_t valueIN){
+if(valueIN=='1'){
+  return true;
+}else{
+  return false;
+}
+}
+//-----------------------------------------------------------------
 void setup()
 {
   BaudRate_Sensor = 9600;
@@ -106,25 +133,22 @@ void setup()
 
 void loop()
 {
-  setSlaveID();
+  SetSlaveID();
 
   uint8_t result;  
   uint16_t data[Quantity];
 
 //  result = node.readInputRegisters(1, 2);
-result = node.readInputRegisters(Address, Quantity);
+
+  result = node.readInputRegisters(Address_read, Quantity);
+
   if (result == node.ku8MBSuccess)
   {
-    //    Serial.print("Temp: ");
-    //    Serial.println(node.getResponseBuffer(0) / 10.0f);
-    //    Serial.print("Humi: ");
-    //    Serial.println(node.getResponseBuffer(1) / 10.0f);
-    //    Serial.println();
 
     for (int i = 0; i < Quantity; i++) {  
       sendMessage[i]= node.getResponseBuffer(i);
     }
- // sent Data
+ // sent Data to Raspbery PI3
    Serial.println("["+sendMessage[0]+","+sendMessage[1]+","+sendMessage[2]+","+sendMessage[3]+","+sendMessage[4]+","+sendMessage[5]+","+sendMessage[6]+","+sendMessage[7]+","+sendMessage[8]+","+sendMessage[9]+","+sendMessage[10]+"]"+"."); 
   }
   else
@@ -133,3 +157,4 @@ result = node.readInputRegisters(Address, Quantity);
   }
   delay(1000);
 }
+
