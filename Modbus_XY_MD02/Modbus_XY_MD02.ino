@@ -109,7 +109,7 @@ void loop()
   setSlaveID();
 
   uint8_t result;  
-  uint16_t data[2];
+  uint16_t data[Quantity];
 
 //  result = node.readInputRegisters(1, 2);
 result = node.readInputRegisters(Address, Quantity);
